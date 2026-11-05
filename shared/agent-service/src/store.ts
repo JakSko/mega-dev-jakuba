@@ -1,31 +1,51 @@
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-// Seen: one action per event id. A sender that retries keeps the id, so a resend or a
-// restart never acts twice (lesson 2.1: "prevent duplicate effects"). File-backed, no database.
+// Seen: one action per event id. A sender that retries keeps the id, so a resend never acts
+// twice (lesson 2.1: "prevent duplicate effects"). An id is `done` only after the work
+// succeeded; if the work fails or the process dies first, the id is free again and a resend
+// is handled (at-least-once, not at-most-once). Only done ids go to the file.
+// Not covered: work that already made its outside effect and then crashed before `finish`.
+// For that, pass the event id to the outside service as its idempotency key.
+// On a host, `file` must sit on a volume that survives deploys (Railway: mount one on VAR_DIR).
+export type SeenState = 'new' | 'running' | 'done';
+
 export class Seen {
-  ids = new Set<string>();
+  done = new Set<string>();
+  running = new Set<string>();
   file: string | null;
 
   constructor(file: string | null = 'var/seen-ids.txt') {
     this.file = file;
     if (!file) return;
     try {
-      for (const line of readFileSync(file, 'utf8').split('\n')) if (line) this.ids.add(line);
+      for (const line of readFileSync(file, 'utf8').split('\n')) if (line) this.done.add(line);
     } catch {
       // no file yet
     }
   }
 
-  // true the first time an id is offered, false after.
-  first(id: string): boolean {
-    if (this.ids.has(id)) return false;
-    this.ids.add(id);
+  // Claims an id for work. 'new' means the caller now owns it and must call finish or release.
+  begin(id: string): SeenState {
+    if (this.done.has(id)) return 'done';
+    if (this.running.has(id)) return 'running';
+    this.running.add(id);
+    return 'new';
+  }
+
+  finish(id: string): void {
+    this.running.delete(id);
+    if (this.done.has(id)) return;
+    this.done.add(id);
     if (this.file) {
       mkdirSync(dirname(this.file), { recursive: true });
       appendFileSync(this.file, `${id}\n`);
     }
-    return true;
+  }
+
+  // The work failed: free the id so a resend can try again.
+  release(id: string): void {
+    this.running.delete(id);
   }
 }
 

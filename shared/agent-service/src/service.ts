@@ -4,15 +4,31 @@ import { Seen } from './store.ts';
 import { verify } from './webhook.ts';
 
 // One small public service: a health check, a public rights file (least rights per agent,
-// S01E05 "The file decides what it may touch"), and one signed event endpoint.
-// Checks run in code before any work: size, signature, age, resend. A bad request gets
+// S01E05 "The file decides what it may touch"), and one authenticated event endpoint.
+// Checks run in code before any work: size, sender, age, resend. A bad request gets
 // 401 and costs nothing; a good one gets 202 at once and the work runs after.
+
+export type Header = (name: string) => string | undefined;
+
+// Who sent it, and the event's stable id. Default: Standard Webhooks (S01E05).
+// For mail (S02E02): the provider's own signature check, and the Message-ID as the id.
+export type Authenticate = (header: Header, raw: string) => { ok: true; id: string } | { ok: false; why: string };
+
+export function standardWebhooks(keys: string[], now?: () => number): Authenticate {
+  return (header, raw) => {
+    const id = header('webhook-id');
+    const v = verify({ id, timestamp: header('webhook-timestamp'), signature: header('webhook-signature') }, raw, keys, now?.());
+    return v.ok ? { ok: true, id: id! } : v;
+  };
+}
 
 export type Event = { id: string; raw: string; body: unknown; headers: Record<string, string | undefined> };
 export type Handler = (event: Event) => Promise<void>;
 
 export type ServiceConfig = {
-  keys: string[]; // signing keys; two during a key change
+  keys?: string[]; // signing keys for the default check; two during a key change
+  authenticate?: Authenticate; // replaces the default check
+  parse?: (raw: string) => unknown; // default JSON.parse
   rights: unknown; // the public rights file, served as JSON
   rightsPath?: string; // default /.well-known/agent-rights.json
   eventPath?: string; // default /
@@ -44,6 +60,8 @@ export function createService(cfg: ServiceConfig): Server {
   const rightsPath = cfg.rightsPath ?? '/.well-known/agent-rights.json';
   const eventPath = cfg.eventPath ?? '/';
   const limit = cfg.maxBodyBytes ?? 1024 * 1024;
+  const authenticate = cfg.authenticate ?? standardWebhooks(cfg.keys ?? [], cfg.now);
+  const parse = cfg.parse ?? ((raw: string) => JSON.parse(raw));
 
   return createServer(async (req, res) => {
     const send = (status: number, body: unknown) => {
@@ -57,39 +75,45 @@ export function createService(cfg: ServiceConfig): Server {
     if (req.method !== 'POST' || path !== eventPath) return send(404, { error: 'not found' });
 
     const raw = await readBody(req, limit);
-    const h = (k: string) => (req.headers[k] as string | undefined) ?? undefined;
-    const id = h('webhook-id') ?? null;
+    const header: Header = (k) => {
+      const v = req.headers[k.toLowerCase()];
+      return Array.isArray(v) ? v.join(', ') : v;
+    };
     if (raw === null) {
-      cfg.log({ event: 'request', id, verdict: 'rejected', why: 'body too large' });
+      cfg.log({ event: 'request', verdict: 'rejected', why: 'body too large' });
       return send(413, { error: 'rejected' });
     }
-    const v = verify({ id, timestamp: h('webhook-timestamp'), signature: h('webhook-signature') }, raw, cfg.keys, cfg.now?.());
-    if (!v.ok) {
+    const who = authenticate(header, raw);
+    if (!who.ok) {
       // Kept whole (masked): a refused request may say something worth knowing, but is never acted on.
-      cfg.log({ event: 'request', id, verdict: 'rejected', why: v.why, userAgent: h('user-agent') ?? null, body: raw });
+      cfg.log({ event: 'request', verdict: 'rejected', why: who.why, userAgent: header('user-agent') ?? null, body: raw });
       return send(401, { error: 'rejected' });
     }
+    const id = who.id;
     let body: unknown;
     try {
-      body = JSON.parse(raw);
+      body = parse(raw);
     } catch {
-      cfg.log({ event: 'request', id, verdict: 'rejected', why: 'body is not JSON', body: raw });
+      cfg.log({ event: 'request', id, verdict: 'rejected', why: 'body does not parse', body: raw });
       return send(400, { error: 'rejected' });
     }
-    if (!seen.first(id!)) {
-      cfg.log({ event: 'request', id, verdict: 'resend, already handled' });
+    const state = seen.begin(id);
+    if (state !== 'new') {
+      cfg.log({ event: 'request', id, verdict: state === 'done' ? 'resend, already handled' : 'resend, still running' });
       return send(202, { received: true, resend: true });
     }
     cfg.log({ event: 'request', id, verdict: 'accepted', body: raw });
     send(202, { received: true });
 
     const headers: Record<string, string | undefined> = {};
-    for (const [k, val] of Object.entries(req.headers)) headers[k] = Array.isArray(val) ? val.join(', ') : val;
+    for (const k of Object.keys(req.headers)) headers[k] = header(k);
     try {
-      await cfg.handle({ id: id!, raw, body, headers });
+      await cfg.handle({ id, raw, body, headers });
+      seen.finish(id);
       cfg.log({ event: 'handled', id, verdict: 'done' });
     } catch (err) {
-      cfg.log({ event: 'handled', id, verdict: 'failed', why: String((err as Error)?.message ?? err) });
+      seen.release(id);
+      cfg.log({ event: 'handled', id, verdict: 'failed, a resend will retry', why: String((err as Error)?.message ?? err) });
     }
   });
 }

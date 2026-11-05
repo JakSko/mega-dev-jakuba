@@ -8,8 +8,8 @@ Extracted from the S01E05 agents (private repo `JakSko/mega-s01e05-agents`), wit
 
 | Part | File | Lesson or Challenge it comes from |
 |---|---|---|
-| Signed events (Standard Webhooks), two keys during a key change, 5-minute age limit | `src/webhook.ts` | S01E05 "Anyone can wake it" |
-| One action per event id, kept across restarts | `src/store.ts` `Seen` | lesson 2.1 "prevent duplicate effects" |
+| Sender check, pluggable: Standard Webhooks by default (two keys during a key change, 5-minute age), or your own `authenticate(header, raw)` returning the event id | `src/webhook.ts`, `src/service.ts` | S01E05 "Anyone can wake it" |
+| One action per event id: done only after the work succeeds, a failed id is retried on resend; done ids kept in a file | `src/store.ts` `Seen` | lesson 2.1 "prevent duplicate effects", "recover with the right state" |
 | Daily model-call budget, checked before the call | `src/store.ts` `Budget` | S01E05 quota; the wake is the budget |
 | Whole-message log from the first deploy, secrets masked; `holdsSecret` for outgoing bodies | `src/guard.ts` | S01E05 snag 4 (a lost ping cannot be read again); lesson 1.5 "secrets by reference" |
 | Public least-rights file | `rights.example.json`, served at `RIGHTS_PATH` | S01E05 "The file decides what it may touch" |
@@ -27,6 +27,11 @@ Extracted from the S01E05 agents (private repo `JakSko/mega-s01e05-agents`), wit
 
 `PORT`, `SIGNING_KEY` (secret), `SIGNING_KEY_NEXT` (secret, optional), `MODEL_KEY` (secret, optional), `DAILY_MODEL_CALLS` (default 20), `RIGHTS_FILE` (default `rights.json`), `RIGHTS_PATH` (default `/.well-known/agent-rights.json`), `EVENT_PATH` (default `/`), `VAR_DIR` (default `var`), `LOG_FILE`.
 
+## Limits to know
+
+- **State on the host.** `Seen` and `Budget` write to `VAR_DIR`. On Railway the disk is not kept between deploys: mount a volume on `VAR_DIR`, or a redeploy forgets which events were done.
+- **Exactly once is not promised.** If the work made its outside effect (a reply sent) and the process died before `finish`, a resend repeats it. Pass the event id to the outside service as its idempotency key where it has one, or record the intent before the send.
+
 ## Not here on purpose
 
-A model client, mail, MCP: they differ per Challenge. For mail (S02E02) the sender is not signed the Standard Webhooks way: replace `verify` with the provider's own check, and keep the rest.
+A model client, mail, MCP: they differ per Challenge. For mail (S02E02): pass `authenticate` with the provider's own check (its signature or token, plus SPF/DKIM results if it gives them) and the `Message-ID` as the id, and `parse` for its body format. Thread replies (`In-Reply-To`, `References`) and loop protection (ignore auto-replies and our own address) go in `handle`. For a remote MCP server (S02E03) the MCP library brings its own transport; keep `guard.ts` and `store.ts`, not the HTTP part.

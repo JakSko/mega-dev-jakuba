@@ -14,6 +14,6 @@ This repo holds **my own code** for each Challenge. It does not hold the course'
 | S01E04 before i looked | Take over a team's repo, turn its plan into issues, let agents build it, send a reviewer a public preview | 7 issues built by 5 agents in parallel worktrees (35 tests), preview on Railway checked like a stranger | [s01e04-before-i-looked](s01e04-before-i-looked/) + [public repo](https://github.com/JakSko/mega-s01e04-before-i-looked) |
 | S01E05 answer where i asked | Put agents on a host that answer the course's signed pings with nobody at the keyboard; one writes a failing test | two agents behind one address: signature checks, live tracker reads, least rights per agent, a test proven red in a clean child process (60 tests) | [s01e05-answer-where-i-asked](s01e05-answer-where-i-asked/) |
 
-Shared: [shared/agent-service](shared/agent-service/) - a zero-dependency skeleton for a public agent service (signed events, resend guard, rights file, whole-message log, model budget), extracted from S01E05 for the next Challenges.
+Shared: [shared/agent-service](shared/agent-service/) - a zero-dependency skeleton for a public agent service (pluggable sender check, retry after a failed run, rights file, whole-message log, model budget; 6 tests), extracted from S01E05 for the next Challenges.
 
 More Challenges are added after each one is solved.
