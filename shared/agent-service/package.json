@@ -1,0 +1,11 @@
+{
+  "name": "agent-service-skeleton",
+  "private": true,
+  "type": "module",
+  "description": "Zero-dependency skeleton for a public agent service: signed events, resend guard, least-rights file, whole-message log, model budget.",
+  "engines": { "node": ">=23.6" },
+  "scripts": {
+    "start": "node src/main.ts",
+    "test": "node --test test/*.test.ts"
+  }
+}

@@ -1,0 +1,11 @@
+# Only what the two agents need goes to the host (spec C7).
+.git
+node_modules
+var
+.env
+.env.*
+.claude
+tools
+test/agents.*
+test/fixtures
+docs/issues

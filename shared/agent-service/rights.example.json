@@ -1,0 +1,6 @@
+{
+  "owner": "<owner code from the Challenge, set at deploy>",
+  "agents": {
+    "answerer": { "wakes": "ask", "may": ["answer"] }
+  }
+}
