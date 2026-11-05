@@ -1,0 +1,4 @@
+{"cwd": "/home/team-a/shop", "sessionId": "11111111-2222-4333-8444-555555555555", "type": "user", "timestamp": "2026-01-01T09:00:00.000Z", "message": {"role": "user", "content": "pick a cache for the price list"}}
+{"cwd": "/home/team-a/shop", "sessionId": "11111111-2222-4333-8444-555555555555", "type": "assistant", "timestamp": "2026-01-01T09:05:00.000Z", "message": {"role": "assistant", "content": [{"type": "text", "text": "Use Redis 7 on port 6379."}]}}
+{"cwd": "/home/team-a/shop", "sessionId": "11111111-2222-4333-8444-555555555555", "type": "user", "timestamp": "2026-01-01T09:06:00.000Z", "message": {"role": "user", "content": "go with that."}}
+{"cwd": "/home/team-a/shop", "sessionId": "11111111-2222-4333-8444-555555555555", "type": "user", "timestamp": "2026-01-01T10:00:00.000Z", "message": {"role": "user", "content": "CI clashes on 6379, fix the CI side"}}

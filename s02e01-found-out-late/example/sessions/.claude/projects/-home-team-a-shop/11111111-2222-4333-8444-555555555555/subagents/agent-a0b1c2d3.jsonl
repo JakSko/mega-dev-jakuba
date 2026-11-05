@@ -1,0 +1,2 @@
+{"cwd": "/home/team-a/shop", "sessionId": "11111111-2222-4333-8444-555555555555", "type": "user", "timestamp": "2026-01-01T10:00:05.000Z", "isSidechain": true, "message": {"role": "user", "content": "fix the CI side"}}
+{"cwd": "/home/team-a/shop", "sessionId": "11111111-2222-4333-8444-555555555555", "type": "assistant", "timestamp": "2026-01-01T10:03:00.000Z", "isSidechain": true, "message": {"role": "assistant", "content": [{"type": "text", "text": "Publish it on host port 6390, same locally."}]}}

@@ -1,0 +1,13 @@
+{
+  "watches": [
+    {
+      "name": "sessions-list",
+      "url_file": "C:/path/to/a/private/reply.json",
+      "url_key": [
+        "sessions",
+        "url"
+      ],
+      "baseline": "C:/path/to/a/private/sessions-list.baseline"
+    }
+  ]
+}
