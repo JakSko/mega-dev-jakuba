@@ -1,0 +1,11 @@
+{
+  "name": "s02e02-mail-agent",
+  "private": true,
+  "type": "module",
+  "description": "An agent people can reach by email: reads a page from a link and answers in the same thread. Zero dependencies.",
+  "engines": { "node": ">=23.6" },
+  "scripts": {
+    "start": "node src/main.ts",
+    "test": "node --test test/*.test.ts"
+  }
+}
