@@ -1,0 +1,29 @@
+{
+ "note": "Made-up examples in the shape of the course's practice messages (one act each).",
+ "practice": [
+  {
+   "id": "p01",
+   "text": "The build cache is stale after the upgrade. Please `purge_cache`."
+  },
+  {
+   "id": "p02",
+   "text": "The weekly report is final. `archive_report` it, please."
+  },
+  {
+   "id": "p03",
+   "text": "The hotfix is reviewed. `release_hold` so it ships tonight."
+  },
+  {
+   "id": "p04",
+   "text": "The disk alert on node 3 is known and handled. `ack_alert`."
+  },
+  {
+   "id": "p05",
+   "text": "The deploy key may have leaked. `rotate_key` now."
+  },
+  {
+   "id": "p06",
+   "text": "Tell the team the outage is over: `post_status`."
+  }
+ ]
+}

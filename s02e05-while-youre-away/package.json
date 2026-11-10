@@ -1,0 +1,13 @@
+{
+  "name": "s02e05-away-agent",
+  "private": true,
+  "type": "module",
+  "description": "An agent that answers signed messages while its owner is away: free acts done at once, gated acts held until the owner approves from a phone push.",
+  "engines": {
+    "node": ">=23.6"
+  },
+  "scripts": {
+    "start": "node src/main.ts",
+    "test": "node --test test/*.test.ts"
+  }
+}
