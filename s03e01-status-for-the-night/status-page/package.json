@@ -1,0 +1,7 @@
+{
+  "name": "s03e01-status",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": { "start": "node start.mjs", "test": "node --test" }
+}
