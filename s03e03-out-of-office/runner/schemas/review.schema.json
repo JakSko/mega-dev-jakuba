@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdict", "reasons"],
+  "properties": {
+    "verdict": { "type": "string", "enum": ["pass", "block"] },
+    "reasons": { "type": "array", "items": { "type": "string" }, "description": "For block: each thing that must change. For pass: empty." }
+  }
+}

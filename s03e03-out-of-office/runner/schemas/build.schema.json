@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["files", "notes"],
+  "properties": {
+    "files": {
+      "type": "array",
+      "description": "Every file added or changed, each with its whole new content.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "content"],
+        "properties": {
+          "path": { "type": "string", "description": "src/..., test/..., contract/api.md or PRIMITIVES.md" },
+          "content": { "type": "string", "description": "The whole file, not a diff." }
+        }
+      }
+    },
+    "notes": { "type": "string", "description": "One or two lines: what changed and which primitives it touches. Empty files and a reason here if the brief cannot be met within the rules." }
+  }
+}

@@ -1,0 +1,6 @@
+.git
+.tools
+**/node_modules
+**/.wrangler
+**/.dev.vars
+secrets

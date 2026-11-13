@@ -1,0 +1,10 @@
+name = "example-api"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# FEED_URL is a secret on the production environment: `wrangler secret put FEED_URL --env production`.
+# Not a [vars] entry on purpose: top-level [vars] do not reach --env production, and a var would be
+# reset by every deploy.
+
+[env.production]
+workers_dev = true

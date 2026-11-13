@@ -1,0 +1,9 @@
+{
+  "name": "out-of-office-runner",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/main.mjs",
+    "test": "node --test"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "example-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "deploy": "wrangler deploy --env production"
+  },
+  "devDependencies": {
+    "wrangler": "4.149.0"
+  }
+}

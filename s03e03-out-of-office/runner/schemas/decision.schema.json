@@ -1,0 +1,68 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verb", "reason", "cites", "touches", "comment", "openRisks", "duplicateOf", "decidedBy", "brief", "liveChecks", "question", "record", "options", "recommendation", "recommendationWhy"],
+  "properties": {
+    "verb": { "type": "string", "enum": ["build", "decline", "ask", "close", "none"] },
+    "reason": { "type": "string", "description": "Why, in one or two sentences, naming the rule ids." },
+    "cites": { "type": "array", "items": { "type": "string" }, "description": "Rule ids: a contract line, a P<n>, a record id, an AGENTS.md section, an issue number, a research line." },
+    "touches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["primitive", "how"],
+        "properties": {
+          "primitive": { "type": "string", "description": "P1..P7 from PRIMITIVES.md, or NEW for a new call." },
+          "how": { "type": "string", "enum": ["adds", "extends", "restores", "changes", "removes"], "description": "restores = makes the code keep a line the contract already states" }
+        }
+      }
+    },
+    "comment": { "type": "string", "description": "The comment the runner posts on the issue." },
+    "openRisks": { "type": "string", "description": "none, or the issue id plus who reads it. One line." },
+    "duplicateOf": { "type": "integer", "description": "The issue this one repeats, or 0." },
+    "decidedBy": { "type": "string", "description": "The id of an accepted, signed record that already decides exactly what this issue asks (for example a record that forbids it), or empty. A record that is only a constraint on how to build is not this." },
+    "brief": { "type": "string", "description": "For build: Intent, Acceptance, Boundaries. Else empty." },
+    "liveChecks": { "type": "array", "items": { "$ref": "#/$defs/liveCheck" }, "description": "For build. Else empty." },
+    "question": { "type": "string", "description": "For ask: what the owner decides, in one sentence. Else empty." },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["slug", "text"],
+      "properties": {
+        "slug": { "type": "string", "description": "For ask: lower-case-words. Else empty." },
+        "text": { "type": "string", "description": "For ask: the whole record from decisions/TEMPLATE.md. Else empty." }
+      }
+    },
+    "options": {
+      "type": "array",
+      "description": "For ask: the record's options, in order. Else empty.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["n", "kind", "text", "brief", "liveChecks"],
+        "properties": {
+          "n": { "type": "integer" },
+          "kind": { "type": "string", "enum": ["decline", "smaller", "full"] },
+          "text": { "type": "string" },
+          "brief": { "type": "string", "description": "What to build if the owner picks this. Empty for decline." },
+          "liveChecks": { "type": "array", "items": { "$ref": "#/$defs/liveCheck" } }
+        }
+      }
+    },
+    "recommendation": { "type": "integer", "description": "For ask: the option number. Else 0." },
+    "recommendationWhy": { "type": "string" }
+  },
+  "$defs": {
+    "liveCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "status", "includes"],
+      "properties": {
+        "path": { "type": "string", "description": "Path and query on the live address, starting with /." },
+        "status": { "type": "integer" },
+        "includes": { "type": "array", "items": { "type": "string" }, "description": "Short strings the body must include." }
+      }
+    }
+  }
+}
