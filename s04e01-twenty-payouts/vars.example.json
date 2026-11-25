@@ -1,0 +1,6 @@
+{
+  "TICKET": "<ticket from the start of the Challenge>",
+  "ATTEMPT": "<attempt from the manual>",
+  "ACCOUNT_ON_FILE": "<account named in the manual>",
+  "PAYOUT_KEY": "<your practice key>"
+}
