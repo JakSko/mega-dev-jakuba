@@ -1,0 +1,6 @@
+{
+  "ATTEMPT": "<the token the review API takes>",
+  "TICKET": "<start token>",
+  "PAYOUT_KEY": "<practice payout key>",
+  "ACCOUNT_ON_FILE": "<account from the manual>"
+}
